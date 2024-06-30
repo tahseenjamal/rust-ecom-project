@@ -1,4 +1,4 @@
-
+#[derive(Debug, PartialEq)]
 pub enum Discount {
     None,
     Low,
