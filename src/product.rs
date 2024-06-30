@@ -1,6 +1,9 @@
 pub use category::Category;
 pub use tax::Tax;
 
+mod category;
+mod tax;
+
 pub struct Product {
     id: u32,
     name: String,
@@ -39,5 +42,16 @@ impl Product {
     }
 }
 
-mod category;
-mod tax;
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_product() {
+        let product = Product::new(1, "Product 1", 100.0, Category::Electronics, Tax::VAT);
+        assert_eq!(product.get_id(), 1);
+        assert_eq!(product.get_name(), "Product 1");
+        assert_eq!(product.get_category(), &Category::Electronics);
+        assert_eq!(product.get_price(), 120.0);
+    }
+}
