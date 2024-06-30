@@ -31,3 +31,13 @@ impl Customer {
         &self.address
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_customer() {
+        let tahseen: Customer = Customer::new("Tahseen", 48, "tahseen.jamal@gmail.com", "India");
+    }
+}
