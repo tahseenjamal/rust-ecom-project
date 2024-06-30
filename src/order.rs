@@ -69,3 +69,59 @@ impl Order {
             * (1.0 - self.get_discount())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::customer::Customer;
+    use crate::product::Product;
+
+    #[test]
+    fn test_order() {
+        let mut order = Order::new(Customer::new("John Doe", 48, "tahseen.jamal.com", "India"));
+        let product1 = Product::new(
+            1,
+            "Product 1",
+            100.0,
+            crate::product::Category::Electronics,
+            crate::product::Tax::VAT,
+        );
+        let product2 = Product::new(
+            2,
+            "Product 2",
+            200.0,
+            crate::product::Category::Electronics,
+            crate::product::Tax::VAT,
+        );
+        order.add_product(product1);
+        order.add_product(product2);
+        assert_eq!(order.get_total_products(), 2);
+        assert_eq!(order.get_total_unique_products(), 2);
+        assert_eq!(order.get_total_price(), 360.0);
+    }
+
+    #[test]
+    fn test_order_with_discount() {
+        let mut order = Order::new(Customer::new("John Doe", 48, "tahseen.jamal.com", "India"));
+        let product1 = Product::new(
+            1,
+            "Product 1",
+            100.0,
+            crate::product::Category::Electronics,
+            crate::product::Tax::VAT,
+        );
+        let product2 = Product::new(
+            1,
+            "Product 2",
+            200.0,
+            crate::product::Category::Electronics,
+            crate::product::Tax::VAT,
+        );
+        order.add_product(product1);
+        order.add_product(product2);
+        order.set_discount(Discount::Medium);
+        assert_eq!(order.get_total_products(), 2);
+        assert_eq!(order.get_total_unique_products(), 1);
+        assert_eq!(order.get_total_price(), 324.0);
+    }
+}
