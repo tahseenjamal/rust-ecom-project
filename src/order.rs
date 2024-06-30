@@ -1,5 +1,7 @@
 use crate::customer::Customer;
 use crate::product::Product;
+use std::collections::HashMap;
+use uuid::Uuid;
 
 // Making Discount public even when module discount is private. And now that discount is at public level to order,
 // we don't have to use discount module in path, this is useful if you don't want to expose other
@@ -11,38 +13,42 @@ pub use discount::Discount;
 mod discount;
 
 pub struct Order {
-    id: u32,
-    products: Vec<Product>, // This should be a hashmap with product id as key and count as value
+    id: String,
+    products_list: Vec<Product>,
+    products_unique_id_map: HashMap<u32, u32>,
     discount: Discount,
     customer: Customer,
 }
 
 impl Order {
-    pub fn new(id: u32, products: Vec<Product>, discount: Discount, customer: Customer) -> Order {
+    pub fn new(customer: Customer) -> Order {
         Order {
-            id,
-            products,
-            discount,
+            id: Uuid::new_v4().to_string(),
+            products_list: Vec::new(),
+            products_unique_id_map: HashMap::new(),
+            discount: Discount::None,
             customer,
         }
     }
 
     pub fn add_product(&mut self, product: Product) {
-        self.products.push(product);
+        let count = self
+            .products_unique_id_map
+            .entry(product.get_id())
+            .or_insert(0);
+        *count += 1;
+        self.products_list.push(product);
     }
 
-    pub fn get_total_products(&self) -> usize {
-        self.products.len()
+    pub fn get_total_unique_products(&self) -> usize {
+        self.products_unique_id_map.len()
     }
-    pub fn product_wise_count(&self) -> usize {
-        //find total unique product ids
-        let mut unique_product_ids: Vec<u32> = Vec::new();
-        for product in &self.products {
-            if !unique_product_ids.contains(&product.get_id()) {
-                unique_product_ids.push(product.get_id());
-            }
-        }
-        unique_product_ids.len()
+    pub fn get_total_products(&self) -> usize {
+        self.products_list.len()
+    }
+
+    pub fn set_discount(&mut self, discount: Discount) {
+        self.discount = discount;
     }
 
     fn get_discount(&self) -> f64 {
@@ -55,7 +61,11 @@ impl Order {
         }
     }
 
-    pub fn get_total(&self) -> f64 {
-        self.products.iter().map(|p| p.get_price()).sum::<f64>() * (1.0 - self.get_discount())
+    pub fn get_total_price(&self) -> f64 {
+        self.products_list
+            .iter()
+            .map(|product| product.get_price())
+            .sum::<f64>()
+            * (1.0 - self.get_discount())
     }
 }
